@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Shop.ProductAPI.Context;
 using Shop.ProductAPI.Models;
+using Shop.ProductAPI.Models.DTOs;
 using System.Linq.Expressions;
 
 namespace Shop.ProductAPI.Repositories
@@ -14,14 +15,29 @@ namespace Shop.ProductAPI.Repositories
             this.applicationDbContext = applicationDbContext;
         }
 
-        public Task<Product> Create(Product category)
+        public async Task<Product> Create(Product product)
         {
-            throw new NotImplementedException();
+            if (product is null)
+            {
+                throw new ArgumentNullException(nameof(product));
+            }
+            await applicationDbContext.Products.AddAsync(product);
+            return product;
         }
 
-        public Task<Product> Delete(Guid id)
+        public async Task<Product> Delete(Guid id)
         {
-            throw new NotImplementedException();
+            if (id == null || id == Guid.Empty)
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
+            var prodExists = applicationDbContext.Products.Find(id);
+            if (prodExists != null)
+            {
+                applicationDbContext.Products.Remove(prodExists);
+                return prodExists;
+            }
+            throw new ArgumentNullException("Prod does not exist...");
         }
 
         public async Task<IEnumerable<Product>> GetAll(Expression<Func<Product, bool>>? predicate)
@@ -36,14 +52,26 @@ namespace Shop.ProductAPI.Repositories
             return await data.ToListAsync();
         }
 
-        public Task<Product> GetById(Guid id)
+        public async Task<Product> GetById(Guid id)
         {
-            throw new NotImplementedException();
+            if (id == Guid.Empty)
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
+
+            var product = await applicationDbContext.Products.FindAsync(id);
+            return product;
         }
 
-        public Task<Product> Update(Product category)
+        public async Task<Product> Update(Product product)
         {
-            throw new NotImplementedException();
+            var productExists = applicationDbContext.Products.AsNoTracking().Any(product  => product.Id == product.Id);
+            if (productExists)
+            {
+                applicationDbContext.Products.Entry(product).State = EntityState.Modified;
+                return product;
+            }
+            throw new InvalidOperationException("Product not found");
         }
     }
 }

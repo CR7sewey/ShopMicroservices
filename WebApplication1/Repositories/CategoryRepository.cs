@@ -15,14 +15,34 @@ namespace Shop.ProductAPI.Repositories
             this.applicationDbContext = applicationDbContext;
         }
 
-        public Task<Category> Create(Category category)
+        public async Task<Category> Create(Category category)
         {
-            throw new NotImplementedException();
+            if (category == null)
+            {
+                throw new ArgumentNullException("Please insert a valid category");
+            }
+
+            await applicationDbContext.AddAsync(category);
+            return category;
+
         }
 
-        public Task<Category> Delete(Guid id)
+        public async Task<Category> Delete(Guid id)
         {
-            throw new NotImplementedException();
+            if (id == null || id == Guid.Empty)
+            {
+                throw new ArgumentNullException("Id cannot be null");
+            }
+
+            var catExists = applicationDbContext.Categories.Find(id);
+            if (catExists is not null)
+            {
+                applicationDbContext.Categories.Remove(catExists);
+                //await applicationDbContext.SaveChangesAsync();
+                return catExists;
+            }
+            throw new ArgumentNullException(nameof(catExists));
+
         }
 
         public async Task<IEnumerable<Category>> GetAll(Expression<Func<Category, bool>>? predicate)
@@ -34,23 +54,41 @@ namespace Shop.ProductAPI.Repositories
                 data = data.Where(predicate);
             }
 
-            return await data.ToListAsync();
+            return await data.AsNoTracking().ToListAsync();
 
         }
 
-        public Task<Category> GetById(Guid id)
+        public async Task<Category> GetById(Guid id)
         {
-            throw new NotImplementedException();
+            if (id == Guid.Empty)
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
+
+            var category = await applicationDbContext.Categories.FindAsync(id); // Where(c => c.Id == id).FirstOrDefault();
+            return category;
+
         }
 
-        public Task<IEnumerable<Category>> GetCategoriesProducts()
+        public async Task<IEnumerable<Category>> GetCategoriesProducts()
         {
-            throw new NotImplementedException();
+            IQueryable<Category> categories = applicationDbContext.Categories.Include(x => x.Products).AsQueryable().AsNoTracking();
+            return await categories.ToListAsync();
+
         }
 
-        public Task<Category> Update(Category category)
+        public async Task<Category> Update(Category category)
         {
-            throw new NotImplementedException();
+
+            // C#
+            var tracked =await  applicationDbContext.Categories.AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == category.Id);
+            //if (tracked != null) applicationDbContext.Entry(tracked.Entity).State = EntityState.Detached;
+            if (tracked == null) throw new InvalidOperationException("Cat not found");
+
+            applicationDbContext.Entry(category).State = EntityState.Modified;
+            return category;
+
         }
     }
 }

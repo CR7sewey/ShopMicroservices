@@ -7,8 +7,8 @@ namespace Shop.ProductAPI.Repositories
     {
         Task<Product> GetById(Guid id);
         Task<IEnumerable<Product>> GetAll(Expression<Func<Product, bool>>? predicate);
-        Task<Product> Create(Product category);
-        Task<Product> Update(Product category);
+        Task<Product> Create(Product product);
+        Task<Product> Update(Product product);
         Task<Product> Delete(Guid id);
     }
 }

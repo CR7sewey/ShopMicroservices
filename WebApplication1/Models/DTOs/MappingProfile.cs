@@ -8,6 +8,7 @@ namespace Shop.ProductAPI.Models.DTOs
         {
             CreateMap<Category, CategoryDTO>().ReverseMap();
             CreateMap<Product, ProductDTO>().ReverseMap();
+            CreateMap<Category, CategoryProductDTO>();
         }
     }
 }

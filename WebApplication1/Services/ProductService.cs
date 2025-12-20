@@ -10,11 +10,35 @@ namespace Shop.ProductAPI.Services
     {
         private readonly IMapper _mapper;
         private readonly IProductRepository productRepository;
+        private readonly IUnitOfWork _unitOfWork;
+
 
         public ProductService(IMapper mapper, IUnitOfWork unitOfWork)
         {
             _mapper = mapper;
+            _unitOfWork = unitOfWork;
             productRepository = unitOfWork.ProductRepository;
+        }
+
+        public async Task<ProductDTO> Create(ProductDTO entity)
+        {
+            if (entity != null)
+            {
+                var p = _mapper.Map<Product>(entity);
+                var product = await productRepository.Create(p);
+                await _unitOfWork.Save();
+                entity.Id = product.Id;
+
+            }
+            return entity;
+        }
+
+        public async Task<ProductDTO> Delete(Guid id)
+        {
+            var product = await productRepository.Delete(id);
+            await _unitOfWork.Save();
+            var productDTO = _mapper.Map<ProductDTO>(product);
+            return productDTO;
         }
 
         public async Task<IEnumerable<ProductDTO>> GetAll(Expression<Func<Product, bool>>? predicate)
@@ -31,6 +55,22 @@ namespace Shop.ProductAPI.Services
                 }
             }
             return productDTOs;
+        }
+
+        public async Task<ProductDTO> GetById(Guid id)
+        {
+            var product = await productRepository.GetById(id);
+            var productDTO = _mapper.Map<ProductDTO>(product);
+            return productDTO;
+        }
+
+
+        public async Task<ProductDTO> Update(ProductDTO entity)
+        {
+            var prod = _mapper.Map<Product>(entity);
+            var product = await productRepository.Update(prod);
+            await _unitOfWork.Save();
+            return entity;
         }
     }
 }
