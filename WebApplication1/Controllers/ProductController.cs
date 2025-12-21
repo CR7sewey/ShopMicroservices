@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Shop.ProductAPI.Models;
@@ -9,6 +10,7 @@ namespace Shop.ProductAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableCors("WEB")]
     public class ProductController : ControllerBase
     {
 

@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="Shop.Web/Shop.Web.csproj" Id="07101982-4c9a-4c79-9724-d8ff95d195cd" />
   <Project Path="WebApplication1/Shop.ProductAPI.csproj" />
 </Solution>

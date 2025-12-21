@@ -4,12 +4,17 @@ using Shop.ProductAPI.Models;
 using Shop.ProductAPI.Models.DTOs;
 using Shop.ProductAPI.Repositories;
 using Shop.ProductAPI.Services;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles; // to prevent object cycle (references)
+});
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
@@ -31,7 +36,16 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IService<ProductDTO, Product>, ProductService>();
 
-
+// CORS
+var frontendURI = "http://localhost:5011";
+builder.Services.AddCors(cors =>
+{
+    cors.AddPolicy(name: "WEB", policy =>
+    {
+        policy.WithOrigins(frontendURI);
+        policy.AllowAnyHeader();
+    });
+});
 
 var app = builder.Build();
 
@@ -45,6 +59,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseRouting();
+app.UseCors();
 
 app.UseAuthorization();
 
