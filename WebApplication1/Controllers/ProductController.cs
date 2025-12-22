@@ -61,7 +61,7 @@ namespace Shop.ProductAPI.Controllers
             return CreatedAtAction("Get", new { id = prod.Id }, prod);
         }
 
-        [HttpPost("{id}")]
+        [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         [ProducesDefaultResponseType]

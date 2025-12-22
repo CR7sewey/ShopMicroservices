@@ -20,7 +20,8 @@ builder.Services.AddHttpClient(PRODUCT_API, httpClient =>
 });
 
 // Services DI
-builder.Services.AddScoped<ProductsService, ProductsService>();
+builder.Services.AddScoped<IProductService, ProductsService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 
 var app = builder.Build();
