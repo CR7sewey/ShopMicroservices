@@ -21,6 +21,8 @@ namespace Shop.ProductAPI.Models.DTOs
         [MaxLength(1024)]
         public string? ImageUrl { get; set; }
 
+        public string? CategoryName { get; set; }
+
         public Guid? CategoryId { get; set; } // Foreign Key
     
     }

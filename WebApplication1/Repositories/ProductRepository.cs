@@ -42,7 +42,7 @@ namespace Shop.ProductAPI.Repositories
 
         public async Task<IEnumerable<Product>> GetAll(Expression<Func<Product, bool>>? predicate)
         {
-            IQueryable<Product> data = applicationDbContext.Products.AsQueryable();
+            IQueryable<Product> data = applicationDbContext.Products.Include(p => p.Category).AsQueryable();
 
             if (predicate is not null)
             {
@@ -59,7 +59,7 @@ namespace Shop.ProductAPI.Repositories
                 throw new ArgumentNullException(nameof(id));
             }
 
-            var product = await applicationDbContext.Products.FindAsync(id);
+            var product = await applicationDbContext.Products.Include(p => p.Category).FirstOrDefaultAsync(p => p.Id == id);
             return product;
         }
 
