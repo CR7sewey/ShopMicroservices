@@ -19,3 +19,12 @@
 - Repositories: CategoryRepository (ICategoryRepository), ProductRepository (IProductRepository), UnitOfWork (IUnitOfWork)
 - Services: CategoryService (ICategoryService <-- IService), ProductService (IService)
 - Controller: CategoryController, ProductController
+
+### Web
+Web version integrating all microservices.
+
+#### 1 - Controllers, Models, Services, Views
+- Controller: Products Controller - consumes the data from Services
+- Models: Replication of DTO sent from Microservices controllers
+- Services: Fetch data from microservices using HttpClientFactory. ProductsService (IProductService), CategoryService (ICategoryService)
+- Dependencies: Microsoft.Extensions.Http (for creating HttpClient to fetch microservices apis)
