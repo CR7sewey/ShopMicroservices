@@ -1,4 +1,5 @@
 ﻿using Shop.Web.Models;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
@@ -62,11 +63,13 @@ namespace Shop.Web.Services
             return product;
         }
 
-        public async Task<ProductViewModel> CreateProduct(ProductViewModel productVM)
+        public async Task<ProductViewModel> CreateProduct(ProductViewModel productVM, string token)
         {
             var client = _httpClientFactory.CreateClient(PRODUCT_API);
             var p = JsonSerializer.Serialize(productVM);
             StringContent content = new StringContent(p, Encoding.UTF8, "application/json");
+            AppendAuthorizationHeader(token, client);
+
             using (var response = await client.PostAsync("/api/Product", content)) {
                 if (response.IsSuccessStatusCode)
                 {
@@ -82,11 +85,14 @@ namespace Shop.Web.Services
 
         }
 
-        public async Task<ProductViewModel> UpdateProduct(Guid id, ProductViewModel productVM)
+        public async Task<ProductViewModel> UpdateProduct(Guid id, ProductViewModel productVM, string token)
         {
             var client = _httpClientFactory.CreateClient(PRODUCT_API);
             var p = JsonSerializer.Serialize(productVM);
             StringContent content = new StringContent(p, Encoding.UTF8, "application/json");
+
+            AppendAuthorizationHeader(token, client);
+
             using (var response = await client.PutAsync($"/api/Product/{id}", content))
             {
                 if (response.IsSuccessStatusCode)
@@ -103,9 +109,11 @@ namespace Shop.Web.Services
             return product;
         }
 
-        public async Task<bool> DeleteProduct(Guid id)
+        public async Task<bool> DeleteProduct(Guid id, string token)
         {
             var client = _httpClientFactory.CreateClient(PRODUCT_API);
+            AppendAuthorizationHeader(token, client);
+
             using (var response = await client.DeleteAsync($"/api/Product/{id}"))
             {
                 if (response.IsSuccessStatusCode)
@@ -118,6 +126,12 @@ namespace Shop.Web.Services
                 }
             }
            
+        }
+
+
+        private void AppendAuthorizationHeader(string token, HttpClient client) 
+        { 
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         }
     }
 }

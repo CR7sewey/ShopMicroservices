@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Http;
 using Shop.Web.Models;
+using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace Shop.Web.Services
@@ -17,9 +18,10 @@ namespace Shop.Web.Services
             this.httpClientFactory = httpClientFactory;
             _serializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         }
-        public async Task<IEnumerable<CategoryViewModel>> GetAllCategories()
+        public async Task<IEnumerable<CategoryViewModel>> GetAllCategories(string token)
         {
             var client = httpClientFactory.CreateClient(PRODUCT_API);
+            AppendAuthorizationHeader(token, client);
             using (var response = await client.GetAsync("/api/Category"))
             {
                 if (response.IsSuccessStatusCode)
@@ -33,6 +35,11 @@ namespace Shop.Web.Services
                 }
             }
             return _categories;
+        }
+
+        private void AppendAuthorizationHeader(string token, HttpClient client)
+        {
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         }
     }
 }

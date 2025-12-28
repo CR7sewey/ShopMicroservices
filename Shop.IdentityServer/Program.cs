@@ -1,9 +1,11 @@
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Shop.IdentityServer.Configuration;
 using Shop.IdentityServer.Context;
 using Shop.IdentityServer.IdentityServer;
+using Shop.IdentityServer.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,7 +61,7 @@ builderIdentityServer.AddDeveloperSigningCredential();
 
 
 builder.Services.AddScoped<IDatabaseSeedInitializar, DatabaseIdentityServerInitializer>();
-
+builder.Services.AddScoped<IProfileService, ProfileAppService>();
 
 builder.Services.AddAuthorization();
 

@@ -40,6 +40,12 @@ namespace Shop.Web.Controllers
         public async Task<ActionResult> Login()
         {
             var accessToken = await HttpContext.GetTokenAsync("access_token");
+            /*Response.Cookies.Append("X-Access-Token", accessToken, new CookieOptions() // append to cookies to sned the requests with authentication
+            {
+                Secure = true, // proteger cookies durante o transporte - se houver alguma sessao htto o cookie nao é enviado
+                HttpOnly = true, // impedir Cross site scripting - impede ataque xss
+                SameSite = SameSiteMode.Strict // impedir o cross site forgery, cookie enviado apenas no contexto primario, site do cookie corresponder ao do url
+            });*/
             return RedirectToAction(nameof(Index));
         }
 
