@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Cors;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Shop.ProductAPI.Models;
 using Shop.ProductAPI.Models.DTOs;
 using Shop.ProductAPI.Services;
+using Shop.Web.Roles;
 
 namespace Shop.ProductAPI.Controllers
 {
@@ -41,6 +43,7 @@ namespace Shop.ProductAPI.Controllers
             return prod is ProductDTO product ? Ok(product) : BadRequest("Product does not exist: "+id);
         }
 
+        [Authorize]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
@@ -61,6 +64,7 @@ namespace Shop.ProductAPI.Controllers
             return CreatedAtAction("Get", new { id = prod.Id }, prod);
         }
 
+        [Authorize]
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
@@ -88,7 +92,7 @@ namespace Shop.ProductAPI.Controllers
 
         }
 
-
+        [Authorize(Role.Admin)]
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]

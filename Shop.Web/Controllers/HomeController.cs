@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Web.Models;
 using System.Diagnostics;
@@ -18,7 +20,8 @@ namespace Shop.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
-          
+          var u = User;
+            Console.WriteLine("User.Identity.IsAuthenticated: " + User.Identity.IsAuthenticated);
             return View();
         }
 
@@ -32,6 +35,19 @@ namespace Shop.Web.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+        [Authorize] // to send to identity server
+        public async Task<ActionResult> Login()
+        {
+            var accessToken = await HttpContext.GetTokenAsync("access_token");
+            return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<ActionResult> Logout()
+        {
+            return SignOut("Cookies", "oidc");
+        }
+
     }
 
 }

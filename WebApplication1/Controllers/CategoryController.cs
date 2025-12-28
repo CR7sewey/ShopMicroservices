@@ -1,13 +1,16 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shop.ProductAPI.Models;
 using Shop.ProductAPI.Models.DTOs;
 using Shop.ProductAPI.Services;
+using Shop.Web.Roles;
 
 namespace Shop.ProductAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CategoryController : ControllerBase
     {
 
@@ -75,6 +78,7 @@ namespace Shop.ProductAPI.Controllers
         /// <returns>An HTTP 201 Created response containing the created category if successful; otherwise, an HTTP 400 Bad
         /// Request response if the input is invalid.</returns>
         [HttpPost]
+        [Authorize(Role.Admin)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         [ProducesDefaultResponseType]
@@ -96,6 +100,7 @@ namespace Shop.ProductAPI.Controllers
         /// <returns>A 204 No Content response if the category was successfully deleted; otherwise, a 404 Not Found response if
         /// the category does not exist.</returns>
         [HttpDelete("{id}")]
+        [Authorize(Role.Admin)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         [ProducesDefaultResponseType]
@@ -123,7 +128,8 @@ namespace Shop.ProductAPI.Controllers
         /// must match <paramref name="id"/>.</param>
         /// <returns>A <see cref="NoContentResult"/> if the update is successful; otherwise, a <see
         /// cref="BadRequestObjectResult"/> if the input is invalid.</returns>
-        [HttpPost("{id}")]
+        [Authorize(Role.Admin)]
+        [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         [ProducesDefaultResponseType]

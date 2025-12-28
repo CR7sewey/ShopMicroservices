@@ -63,10 +63,10 @@ namespace Shop.IdentityServer.Configuration
                 AllowedGrantTypes = GrantTypes.Code, // via code
 
                 // where to redirect to after login
-                RedirectUris = { "https://localhost:5160/signin-oidc" },
+                RedirectUris = { "http://localhost:5011/signin-oidc" },
 
                 // where to redirect to after logout
-                PostLogoutRedirectUris = { "https://localhost:5160/signout-callback-oidc" },
+                PostLogoutRedirectUris = { "http://localhost:5011/signout-callback-oidc" },
 
                 AllowOfflineAccess = true,
 

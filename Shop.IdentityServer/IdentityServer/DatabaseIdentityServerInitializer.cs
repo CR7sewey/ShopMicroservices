@@ -74,6 +74,38 @@ namespace Shop.IdentityServer.IdentityServer
                 }
 
             }
+
+            if (userManager.FindByEmailAsync("client1@gmail.com").Result == null)
+            {
+                ApplicationUser applicationUser = new ApplicationUser()
+                {
+                    UserName = "client1",
+                    NormalizedUserName = "CLIENT1",
+                    Email = "client1@gmail.com",
+                    NormalizedEmail = "client1@gmail.com",
+                    EmailConfirmed = true,
+                    LockoutEnabled = false,
+                    PhoneNumber = "919191919",
+                    FirstName = "Client1",
+                    LastName = "Client1",
+                    SecurityStamp = Guid.NewGuid().ToString(),
+                };
+
+                var resultAdmin = await userManager.CreateAsync(applicationUser, "Secret123#");
+                if (resultAdmin.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(applicationUser, IdentityConfiguration.ADMIN);// .Wait();
+
+                    var adminClaims = userManager.AddClaimsAsync(applicationUser,
+                        new Claim[] {
+                            new Claim(JwtClaimTypes.Name, $"{applicationUser.FirstName} {applicationUser.LastName}"),
+                            new Claim(JwtClaimTypes.GivenName, applicationUser.FirstName),
+                            new Claim(JwtClaimTypes.FamilyName, applicationUser.LastName),
+                            new Claim(JwtClaimTypes.Role, IdentityConfiguration.CLIENT)
+                        }).Result;
+                }
+
+            }
         }
     }
 }

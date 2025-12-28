@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Shop.Web.Models;
+using Shop.Web.Roles;
 using Shop.Web.Services;
 using System.Collections;
 
@@ -42,6 +44,7 @@ namespace Shop.Web.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult> CreateProduct()
         {
             var categories = await _categoryService.GetAllCategories();
@@ -50,6 +53,7 @@ namespace Shop.Web.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult> CreateProduct(ProductViewModel productViewModel)
         {
             if (ModelState.IsValid)
@@ -68,6 +72,7 @@ namespace Shop.Web.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult> EditProduct(Guid id)
         {
             if (id == null || id == Guid.Empty)
@@ -87,6 +92,7 @@ namespace Shop.Web.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult> EditProduct(Guid id, ProductViewModel productViewModel)
         {
             var prod = await _productService.UpdateProduct(id, productViewModel);
@@ -100,6 +106,7 @@ namespace Shop.Web.Controllers
         }
 
         [HttpGet]
+        [Authorize(Role.Admin)]
         public async Task<ActionResult> DeleteProduct(Guid id)
         {
             if (id == null || id == Guid.Empty)
@@ -117,6 +124,7 @@ namespace Shop.Web.Controllers
         }
 
         [HttpPost, ActionName("DeleteProduct")]
+        [Authorize(Role.Admin)]
         public async Task<ActionResult> DeleteProductConfirm(Guid id)
         {
             var prod = await _productService.DeleteProduct(id);
