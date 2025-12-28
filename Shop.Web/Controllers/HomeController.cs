@@ -2,27 +2,46 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Web.Models;
+using Shop.Web.Services;
 using System.Diagnostics;
 using System.Text.Json.Serialization;
 
 namespace Shop.Web.Controllers
 {
+
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IProductService _productService;
 
-        public HomeController(ILogger<HomeController> logger, IHttpClientFactory httpClientFactory)
+        public HomeController(ILogger<HomeController> logger, IHttpClientFactory httpClientFactory, IProductService productService)
         {
             _logger = logger;
             _httpClientFactory = httpClientFactory;
+            _productService = productService;
         }
 
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
-          var u = User;
-            Console.WriteLine("User.Identity.IsAuthenticated: " + User.Identity.IsAuthenticated);
-            return View();
+            var products = await _productService.GetProducts();
+            if (products == null)
+            {
+                products = [];
+            }
+            return View(products);           
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ProductDetails(Guid id)
+        {
+            var product = await _productService.GetProduct(id);
+            if (product == null)
+            {
+                return View("Error");
+            }
+            return View(product);
         }
 
         public IActionResult Privacy()

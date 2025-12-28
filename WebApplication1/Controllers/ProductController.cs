@@ -43,7 +43,7 @@ namespace Shop.ProductAPI.Controllers
             return prod is ProductDTO product ? Ok(product) : BadRequest("Product does not exist: "+id);
         }
 
-        [Authorize]
+        [Authorize(Role.Admin)]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
@@ -64,7 +64,7 @@ namespace Shop.ProductAPI.Controllers
             return CreatedAtAction("Get", new { id = prod.Id }, prod);
         }
 
-        [Authorize]
+        [Authorize(Role.Admin)]
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]

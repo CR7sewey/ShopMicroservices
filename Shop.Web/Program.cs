@@ -30,9 +30,38 @@ builder.Services.AddAuthentication(options =>
     options.DefaultScheme = "Cookies";
     options.DefaultChallengeScheme = "oidc";
 })
-    .AddCookie("Cookies", c=> c.ExpireTimeSpan = TimeSpan.FromMinutes(10))
+    .AddCookie("Cookies", c=> {
+        c.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+        c.Events = new Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationEvents
+        {
+            OnSigningIn = async context =>
+            {
+                // Here you can implement logic that runs when the user signs in
+                await Task.CompletedTask;
+            },
+            OnSignedIn = async context =>
+            {
+                // Here you can implement logic that runs after the user has signed in
+                await Task.CompletedTask;
+            },
+            OnRedirectToAccessDenied = context =>
+            {
+                context.HttpContext.Response.Redirect(builder.Configuration["MicroservicesAddresses:IdentityServer"] + "/Account/AccessDenied");
+                return Task.CompletedTask;
+            }
+        };
+
+    })
     .AddOpenIdConnect("oidc", options =>
     {
+        options.Events.OnRemoteFailure = context =>
+        {
+
+            context.Response.Redirect("/");
+            context.HandleResponse();
+            return Task.FromResult(0);
+        };
+
         options.Authority = builder.Configuration["MicroservicesAddresses:IdentityServer"];
         options.GetClaimsFromUserInfoEndpoint = true;
         options.ClientId = "shop";
