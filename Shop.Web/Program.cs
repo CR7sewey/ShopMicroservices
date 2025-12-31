@@ -20,6 +20,18 @@ builder.Services.AddHttpClient(PRODUCT_API, httpClient =>
     httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 });
 
+// Microservices + HttpClientFactory
+const string CART_API = "CART_API";
+string CART_API_URI = builder.Configuration["MicroservicesAddresses:CartAPI"] ?? throw new ArgumentNullException("Introduce a api uri!");
+
+
+builder.Services.AddHttpClient(CART_API, httpClient =>
+{
+    httpClient.BaseAddress = new Uri(CART_API_URI);
+    httpClient.DefaultRequestHeaders.Accept.Clear();
+    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+});
+
 // Services DI
 builder.Services.AddScoped<IProductService, ProductsService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
