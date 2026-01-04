@@ -18,6 +18,9 @@ builder.Services.AddHttpClient(PRODUCT_API, httpClient =>
     httpClient.BaseAddress = new Uri(PRODUCT_API_URI);
     httpClient.DefaultRequestHeaders.Accept.Clear();
     httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+    httpClient.DefaultRequestHeaders.Add("Connection", "keep-alive");
+    httpClient.DefaultRequestHeaders.Add("Keep-Alive", "3600");
+    httpClient.DefaultRequestHeaders.Add("User-Agent", "HttpClientFactory-ProductAPI");
 });
 
 // Microservices + HttpClientFactory
@@ -35,7 +38,7 @@ builder.Services.AddHttpClient(CART_API, httpClient =>
 // Services DI
 builder.Services.AddScoped<IProductService, ProductsService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
-
+builder.Services.AddScoped<ICartService, CartService>();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -81,6 +84,7 @@ builder.Services.AddAuthentication(options =>
         options.ResponseType = "code";
         options.ClaimActions.MapJsonKey("role", "role", "role");
         options.ClaimActions.MapJsonKey("sub", "sub", "sub");
+        //options.ClaimActions.MapJsonKey("user_id", "user_id", "user_id");
         options.TokenValidationParameters.NameClaimType = "name";
         options.TokenValidationParameters.RoleClaimType = "role";
         options.Scope.Add("shop");

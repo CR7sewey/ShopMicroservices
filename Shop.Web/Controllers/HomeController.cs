@@ -14,12 +14,14 @@ namespace Shop.Web.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IProductService _productService;
+        private readonly ICartService _cartService;
 
-        public HomeController(ILogger<HomeController> logger, IHttpClientFactory httpClientFactory, IProductService productService)
+        public HomeController(ILogger<HomeController> logger, IHttpClientFactory httpClientFactory, IProductService productService, ICartService cartService)
         {
             _logger = logger;
             _httpClientFactory = httpClientFactory;
             _productService = productService;
+            _cartService = cartService;
         }
 
         [HttpGet]
@@ -71,6 +73,110 @@ namespace Shop.Web.Controllers
         public async Task<ActionResult> Logout()
         {
             return SignOut("Cookies", "oidc");
+        }
+
+
+        [HttpPost]
+        [ActionName("ProductDetails")]
+        [Authorize]
+        public async Task<ActionResult> AddToCart(ProductViewModel productViewModel)
+        {
+            var userId = Guid.Parse(User.Claims.Where(u => u.Type == "sub")?.FirstOrDefault()?.Value ?? "01c3d0c8-3e3c-421c-b19d-c53d0bc751e5"); // pre definido para testes
+
+            var cart = await _cartService.GetCartByUserId(userId, await GetToken());
+
+            if (cart == null)
+            {
+                ProductViewModel productCart = (await _productService.GetProduct(productViewModel.Id));
+                ProductCartViewModel productCartViewModel = new ()
+                {
+                    Id = productCart.Id,
+                    Name = productCart.Name,
+                    Description = productCart.Description,
+                    Price = productCart.Price,
+                    Stock = productCart.Stock,
+                    ImageUrl = productCart.ImageUrl,
+                    CategoryName = productCart.CategoryName
+                };
+                cart = new ()
+                {
+                    CartHeader = new CartHeaderViewModel
+                    {
+                        UserId = userId
+                    },
+                    CartItems = new List<CartItemViewModel>()
+                    {
+                        new CartItemViewModel
+                        {
+                            ProductId = productViewModel.Id,
+                            Product = productCartViewModel,
+                            Quantity = productCart.Quantity,
+                            CartHeaderId = cart.CartHeader.Id
+                        }
+                    }
+                };
+                //var newCart = await _cartService.CreateUpdateCart(cart, await GetToken());
+            }
+            else
+            {
+                //var cartItem = cart.CartItems.Where(c => c.ProductId == productViewModel.Id).FirstOrDefault();
+                //if (cartItem == null)
+                //{
+                    ProductViewModel productCart = (await _productService.GetProduct(productViewModel.Id));
+                    ProductCartViewModel productCartViewModel = new ()
+                    {
+                        Id = productCart.Id,
+                        Name = productCart.Name ?? string.Empty,
+                        Description = productCart.Description ?? string.Empty,
+                        Price = productCart.Price,
+                        Stock = productCart.Stock,
+                        ImageUrl = productCart.ImageUrl ?? string.Empty,
+                        CategoryName = productCart.CategoryName ?? string.Empty
+                    };
+                    // no carrinho mas n tem o produto
+                    var cartItem = new CartItemViewModel
+                    {
+                        ProductId = productViewModel.Id,
+                        Quantity = productViewModel.Quantity,
+                        Product = productCartViewModel,
+                        CartHeaderId = cart.CartHeader.Id
+                    };
+                    //IEnumerable<CartItemViewModel> cartItemsNew = new List<CartItemViewModel> { cartItem };
+                    //cartItems.Add(cartItem);
+                    //cart.CartItems = cartItemsNew;
+
+                //}
+                /*else
+                {
+                    // ja tem o produto no carrinho
+                    cartItem.Quantity += 1;
+                    IEnumerable<CartItemViewModel> cartItemsNew = new List<CartItemViewModel> { cartItem };
+                    //cartItems.Add(cartItem);
+                    cart.CartItems = cartItemsNew;
+                }*/
+                IEnumerable<CartItemViewModel> cartItemsNew = new List<CartItemViewModel> { cartItem };
+                //cartItems.Add(cartItem);
+                cart.CartItems = cartItemsNew;
+            }
+            var updatedCart = await _cartService.AddToCart(cart, await GetToken());
+            if (updatedCart is null)
+            {
+                return View(productViewModel);
+            }
+    
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        private async Task<string> GetToken()
+        {
+            return await HttpContext.GetTokenAsync("access_token");
+
+            /*if (HttpContext.Request.Cookies["X-Access-Token"] == null)
+            {
+                return string.Empty;
+            }
+            return HttpContext.Request.Cookies["X-Access-Token"];*/
         }
 
     }

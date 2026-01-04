@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shop.CartAPI.Context;
 using Shop.CartAPI.Models.DTOs;
@@ -10,6 +12,7 @@ namespace Shop.CartAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableCors("WEB")]
     public class CartController : ControllerBase
     {
 
@@ -29,6 +32,10 @@ namespace Shop.CartAPI.Controllers
         [HttpPost("createCart")]
         public async Task<ActionResult> CreateCart([FromBody] CartDTO cartDTO)
         {
+            if (ModelState.IsValid == false)
+            {
+                return BadRequest(ModelState);
+            }
             var createdCart = await _cartService.UpdateCart(cartDTO);
             if (createdCart == null)
             {

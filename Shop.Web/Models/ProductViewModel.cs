@@ -20,6 +20,9 @@ public class ProductViewModel
     [MaxLength(1024)]
     public string? ImageUrl { get; set; }
 
+    [Range(1, 100)]
+    public int Quantity { get; set; } = 1;
+
     public string? CategoryName { get; set; }
     [Display(Name = "Categories")]
 
