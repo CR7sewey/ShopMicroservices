@@ -9,7 +9,6 @@ namespace Shop.DiscountAPI.Models
         [StringLength(50)]
         public string CouponCode { get; set; } = string.Empty;
         public decimal DiscountAmount { get; set; } = 0.00m;
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? ExpiryDate { get; set; }
     }
 }
