@@ -16,9 +16,17 @@ namespace Shop.CartAPI.Repositories
             _dbContext = applicationDbContext;
         }
 
-        public Task<bool> ApplyCoupon(Guid userId, string couponCode)
+        public async Task<bool> ApplyCoupon(Guid userId, string couponCode)
         {
-            throw new NotImplementedException();
+            var cartHeader = await _dbContext.CartHeaders
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+            if (cartHeader is null)
+            {
+                return false;
+            }
+            cartHeader.CouponCode = couponCode;
+            _dbContext.CartHeaders.Update(cartHeader);
+            return true;
         }
 
         public async Task<bool> ClearCart(Guid userId)
@@ -79,9 +87,17 @@ namespace Shop.CartAPI.Repositories
             return cart;
         }
 
-        public Task<bool> RemoveCoupon(Guid userId)
+        public async Task<bool> RemoveCoupon(Guid userId)
         {
-            throw new NotImplementedException();
+            var cartHeader = await _dbContext.CartHeaders
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+            if (cartHeader is null)
+            {
+                return false;
+            }
+            cartHeader.CouponCode = string.Empty;
+            _dbContext.CartHeaders.Update(cartHeader);
+            return true;
         }
 
         public async Task<bool> RemoveItemCart(Guid cartItemId)

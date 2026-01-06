@@ -80,5 +80,33 @@ namespace Shop.CartAPI.Controllers
 
 
         }
+
+        [HttpPut("applyCoupon/{userId}")]
+        public async Task<ActionResult> ApplyCoupon(Guid userId, [FromBody] CartDTO cartDTO)
+        {
+            var cart = await _cartService.GetCartByUserIdAsync(userId); //await _unitOfWork.CartRepository.GetCartByUserId(userId);
+            if (cart == null)
+            {
+                return NotFound();
+            }
+            var isApplied = await _cartService.ApplyCouponAsync(userId, cartDTO);
+            if (!isApplied)
+            {
+                return BadRequest();
+            }
+            return NoContent();
+        }
+
+        [HttpDelete("removeCoupon/{userId}")]
+        public async Task<ActionResult> RemoveCoupon(Guid userId)
+        {
+     
+            var isApplied = await _cartService.RemoveCouponAsync(userId);
+            if (!isApplied)
+            {
+                return BadRequest();
+            }
+            return NoContent();
+        }
     }
 }

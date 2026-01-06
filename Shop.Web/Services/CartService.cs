@@ -11,6 +11,9 @@ namespace Shop.Web.Services
         private readonly JsonSerializerOptions _serializerOptions;
         const string CART_API = "CART_API";
         private CartViewModel _cart;
+
+        const string DISCOUNT_API = "DISCOUNT_API";
+        private CouponViewModel _coupon;
         public CartService(IHttpClientFactory httpClientFactory)
         {
             this.httpClientFactory = httpClientFactory;
@@ -97,6 +100,44 @@ namespace Shop.Web.Services
             }
             return _cart;
         }
+
+        public async Task<bool> ApplyCoupon(CartViewModel cartViewModel, Guid userId, string token)
+        {
+            var client = httpClientFactory.CreateClient(CART_API);
+            AppendAuthorizationHeader(token, client);
+            StringContent content = new(JsonSerializer.Serialize(cartViewModel), Encoding.UTF8, "application/json");
+            using (var response = await client.PutAsync($"/api/Cart/applyCoupon/{userId}", content))
+            {
+                if (response.IsSuccessStatusCode)
+                {
+                    //var data = await response.Content.ReadAsStreamAsync();
+                    //await JsonSerializer.DeserializeAsync<CouponViewModel>(data, _serializerOptions);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        public async Task<bool> RemoveCoupon(Guid userId,  string token)
+        {
+            var client = httpClientFactory.CreateClient(CART_API);
+            AppendAuthorizationHeader(token, client);
+            using (var response = await client.DeleteAsync($"/api/Cart/removeCoupon/{userId}"))
+            {
+                if (response.IsSuccessStatusCode)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
 
         private void AppendAuthorizationHeader(string token, HttpClient client)
         {

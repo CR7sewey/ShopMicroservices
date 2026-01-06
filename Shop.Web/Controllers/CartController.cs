@@ -11,14 +11,16 @@ namespace Shop.Web.Controllers
         private readonly IProductService _productService;
         private readonly ICategoryService _categoryService;
         private readonly ICartService _cartService;
+        private readonly ICouponService _couponService;
         private string token = string.Empty;
 
-        public CartController(ILogger<ProductsController> logger, IProductService productsService, ICategoryService categoryService, ICartService cartService)
+        public CartController(ILogger<ProductsController> logger, IProductService productsService, ICategoryService categoryService, ICartService cartService, ICouponService couponService)
         {
             _logger = logger;
             _productService = productsService;
             _categoryService = categoryService;
             _cartService = cartService;
+            _couponService = couponService;
         }
 
         [HttpGet]
@@ -30,13 +32,22 @@ namespace Shop.Web.Controllers
             {
                 cart = new CartViewModel();
             }
-            cart.CartHeader.TotalAmount = CalculateTotalAmount(cart);
+
+            if (cart.CartHeader != null && !string.IsNullOrEmpty(cart.CartHeader.CouponCode))
+            {
+                var coupon = await _couponService.GetCoupon(cart.CartHeader.CouponCode, await GetToken());
+                if (coupon?.CouponCode != null)
+                {
+                    cart.CartHeader.Discount = coupon.DiscountAmount;
+                }
+            }
+            cart.CartHeader.TotalAmount = CalculateTotalAmount(cart) * (1 - (double) cart.CartHeader.Discount/100);
 
 
             return View(cart);
         }
 
-        [HttpPost]
+        [HttpDelete]
         public async Task<ActionResult> RemoveItem(Guid id)
         {
             var userId = Guid.Parse(User.Claims.Where(u => u.Type == "sub")?.FirstOrDefault()?.Value ?? "01c3d0c8-3e3c-421c-b19d-c53d0bc751e5");
@@ -47,6 +58,47 @@ namespace Shop.Web.Controllers
             }
             return RedirectToAction(nameof(Index));
         }
+
+        [HttpPost]
+        public async Task<ActionResult> ApplyCoupon(CartViewModel cartViewModel)
+        {
+            var userId = Guid.Parse(User.Claims.Where(u => u.Type == "sub")?.FirstOrDefault()?.Value ?? "01c3d0c8-3e3c-421c-b19d-c53d0bc751e5");
+
+            var coupon = await _couponService.GetCoupon(cartViewModel.CartHeader.CouponCode, await GetToken());
+            if (coupon == null) {
+                ViewBag.Erro = "Cupom inválido...";
+                return RedirectToAction(nameof(Index));
+            }
+            if (coupon.ExpiryDate <= DateTime.Now)
+            {
+                ViewBag.Erro = "Cupom expirado...";
+                return RedirectToAction(nameof(Index));
+            }
+
+            bool result = await _cartService.ApplyCoupon(cartViewModel, userId, await GetToken());
+
+            if (result == false)
+            {
+                ViewBag.Erro = "Erro ao aplicar cupom...";
+            }
+            
+
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> DeleteCoupon(CartViewModel cartViewModel)
+        {
+            var userId = Guid.Parse(User.Claims.Where(u => u.Type == "sub")?.FirstOrDefault()?.Value ?? "01c3d0c8-3e3c-421c-b19d-c53d0bc751e5");
+            bool result = await _cartService.RemoveCoupon(userId, await GetToken());
+            if (result == false)
+            {
+                ViewBag.Erro = "Erro ao remover cupom...";
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
 
         private async Task<string> GetToken()
         {

@@ -35,10 +35,23 @@ builder.Services.AddHttpClient(CART_API, httpClient =>
     httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 });
 
+// Microservices + HttpClientFactory
+const string DISCOUNT_API = "DISCOUNT_API";
+string DISCOUNT_API_URI = builder.Configuration["MicroservicesAddresses:DiscountAPI"] ?? throw new ArgumentNullException("Introduce a api uri!");
+
+
+builder.Services.AddHttpClient(DISCOUNT_API, httpClient =>
+{
+    httpClient.BaseAddress = new Uri(DISCOUNT_API_URI);
+    httpClient.DefaultRequestHeaders.Accept.Clear();
+    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+});
+
 // Services DI
 builder.Services.AddScoped<IProductService, ProductsService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<ICouponService, CouponService>();
 
 builder.Services.AddAuthentication(options =>
 {

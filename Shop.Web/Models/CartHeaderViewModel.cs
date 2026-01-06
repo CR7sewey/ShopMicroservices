@@ -13,5 +13,6 @@ namespace Shop.Web.Models
         public ICollection<CartItemViewModel> CartItems { get; set; } = [];
 
         public double TotalAmount { get; set; } = 0.00d;
+        public decimal Discount { get; set; } = 0.00m;
     }
 }

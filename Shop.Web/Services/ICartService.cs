@@ -9,5 +9,7 @@ namespace Shop.Web.Services
         Task<CartViewModel> UpdateCart(CartViewModel cartViewModel, string token);
 
         Task<bool> RemoveFromCart(Guid userId, Guid productId, string token);
+        Task<bool> ApplyCoupon(CartViewModel cartViewModel, Guid userId, string token);
+        Task<bool> RemoveCoupon(Guid userId, string token);
     }
 }

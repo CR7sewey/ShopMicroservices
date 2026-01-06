@@ -85,5 +85,41 @@ namespace Shop.CartAPI.Services
             }
         }
 
+        public async Task<bool> ApplyCouponAsync(Guid userId, CartDTO cartDTO)
+        {
+            try
+            {
+                var applied = await unitOfWork.CartRepository.ApplyCoupon(userId, cartDTO.CartHeader.CouponCode);
+                if (applied)
+                {
+                    await unitOfWork.Save();
+                }
+                return applied;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error applying coupon for user {UserId}", userId);
+                return false;
+            }
+        }
+
+        public async Task<bool> RemoveCouponAsync(Guid userId)
+        {
+            try
+            {
+                var removed = await unitOfWork.CartRepository.RemoveCoupon(userId);
+                if (removed)
+                {
+                    await unitOfWork.Save();
+                }
+                return removed;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error removing coupon for user {UserId}", userId);
+                return false;
+            }
+        }
+
     }
 }
