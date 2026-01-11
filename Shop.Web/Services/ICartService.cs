@@ -11,5 +11,7 @@ namespace Shop.Web.Services
         Task<bool> RemoveFromCart(Guid userId, Guid productId, string token);
         Task<bool> ApplyCoupon(CartViewModel cartViewModel, Guid userId, string token);
         Task<bool> RemoveCoupon(Guid userId, string token);
-    }
+        Task<CheckoutViewModel> CheckoutCompleted(CheckoutViewModel checkoutViewModel, string token);
+    
+        }
 }

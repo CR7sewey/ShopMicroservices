@@ -14,6 +14,9 @@ namespace Shop.Web.Services
 
         const string DISCOUNT_API = "DISCOUNT_API";
         private CouponViewModel _coupon;
+
+        private CheckoutViewModel _checkout;
+
         public CartService(IHttpClientFactory httpClientFactory)
         {
             this.httpClientFactory = httpClientFactory;
@@ -135,6 +138,38 @@ namespace Shop.Web.Services
                 {
                     return false;
                 }
+            }
+        }
+
+        public async Task<CheckoutViewModel?> CheckoutCompleted(CheckoutViewModel checkoutViewModel, string token)
+        {
+            var client = httpClientFactory.CreateClient(CART_API);
+            AppendAuthorizationHeader(token, client);
+            StringContent content = new(JsonSerializer.Serialize(checkoutViewModel), Encoding.UTF8, "application/json");
+            
+            try
+            {
+                using (var response = await client.PostAsync($"/api/Cart/checkout", content))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var data = await response.Content.ReadAsStreamAsync();
+                        _checkout = await JsonSerializer.DeserializeAsync<CheckoutViewModel>(data, _serializerOptions);
+                        return _checkout;
+                    }
+                    else
+                    {
+                        // Log or handle the error response for debugging
+                        var errorContent = await response.Content.ReadAsStringAsync();
+                        System.Diagnostics.Debug.WriteLine($"Checkout error: {response.StatusCode} - {errorContent}");
+                        return null;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Checkout exception: {ex.Message}");
+                return null;
             }
         }
 

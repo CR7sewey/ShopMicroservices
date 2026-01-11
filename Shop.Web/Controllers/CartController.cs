@@ -99,6 +99,60 @@ namespace Shop.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
+        public async Task<ActionResult> Checkout()
+        {
+            var userId = Guid.Parse(User.Claims.Where(u => u.Type == "sub")?.FirstOrDefault()?.Value ?? "01c3d0c8-3e3c-421c-b19d-c53d0bc751e5");
+            var cart = await _cartService.GetCartByUserId(userId, await GetToken());
+            if (cart == null)
+            {
+                cart = new CartViewModel();
+            }
+
+            if (cart.CartHeader != null && !string.IsNullOrEmpty(cart.CartHeader.CouponCode))
+            {
+                var coupon = await _couponService.GetCoupon(cart.CartHeader.CouponCode, await GetToken());
+                if (coupon?.CouponCode != null)
+                {
+                    cart.CartHeader.Discount = coupon.DiscountAmount;
+                }
+            }
+            cart.CartHeader.TotalAmount = CalculateTotalAmount(cart) * (1 - (double)cart.CartHeader.Discount / 100);
+
+            CheckoutViewModel checkoutViewModel = new CheckoutViewModel()
+            {
+                CartHeader = cart.CartHeader,
+                CartItems = cart.CartItems
+            };
+
+            return View(checkoutViewModel);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Checkout(CheckoutViewModel checkoutViewModel)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(checkoutViewModel);
+            }
+            var cart = await _cartService.GetCartByUserId(checkoutViewModel.CartHeader.UserId, await GetToken());
+            checkoutViewModel.CartItems = cart.CartItems;
+            checkoutViewModel.CartHeader = cart.CartHeader;
+            var response = await _cartService.CheckoutCompleted(checkoutViewModel, await GetToken());
+            
+            if (response is null)
+            {
+                ViewBag.Erro = "Erro ao processar o pedido...";
+                return View(checkoutViewModel);
+            }
+            return View(nameof(CheckoutCompleted));
+        }
+
+        [HttpGet]
+        public IActionResult CheckoutCompleted()
+        {
+            return View();
+        }
 
         private async Task<string> GetToken()
         {

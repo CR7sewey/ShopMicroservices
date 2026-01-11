@@ -97,6 +97,31 @@ namespace Shop.CartAPI.Controllers
             return NoContent();
         }
 
+        [HttpPost("checkout")]
+        public async Task<ActionResult<CheckoutDTO>> GetCheckoutDetails([FromBody] CheckoutDTO checkoutDTO)
+        {
+            // Validate the request
+            if (checkoutDTO?.CartHeader == null)
+            {
+                return BadRequest(new { message = "CartHeader is required for checkout" });
+            }
+
+            var userId = checkoutDTO.CartHeader.UserId;
+            var cart = await _cartService.GetCartByUserIdAsync(userId);
+            if (cart == null)
+            {
+                return NotFound(new { message = "Cart not found..." });
+            }
+
+            checkoutDTO.CartHeader = cart.CartHeader;
+            checkoutDTO.CartItems = cart.CartItems;
+            checkoutDTO.DateTime = DateTime.UtcNow;
+            
+            return Ok(checkoutDTO);
+        }
+
+
+
         [HttpDelete("removeCoupon/{userId}")]
         public async Task<ActionResult> RemoveCoupon(Guid userId)
         {
